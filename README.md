@@ -57,6 +57,7 @@ Open [http://localhost:61000](http://localhost:61000) to view the component stor
 
 ### UI Components & Interactions
 - **[Radix UI](https://www.radix-ui.com/)** - Headless UI primitives
+- **[shadcn/ui](https://ui.shadcn.com/)** - Beautiful, accessible components (Tooltip, Dropdown Menu, Card)
 - **[Lucide React](https://lucide.dev/)** - Beautiful icons
 - **[Swapy](https://swapy.tahazsh.com/)** - Drag & drop functionality
 - **[Ladle](https://ladle.dev/)** - Component development environment
@@ -74,6 +75,7 @@ Open [http://localhost:61000](http://localhost:61000) to view the component stor
 - **Inline Editing** - Click to rename pages with contenteditable
 - **Dropdown Actions** - Comprehensive page management menu
 - **Smart Drag Handling** - Automatic drag disable/enable during dropdown interactions
+- **Hold-to-Drag** - Pages use dragOnHold configuration requiring users to hold down to initiate reordering
 
 ### Form Management
 - **Auto-save Functionality** - Form data saves automatically as you type
@@ -128,10 +130,12 @@ const loadStateFromStorage = (): AppState => {
 
 ### PageNavigator
 The main navigation component featuring:
-- **Swapy Integration** - Drag & drop with `createSwapy()`
+- **Swapy Integration** - Drag & drop with `createSwapy()` using `dragOnHold` configuration
+- **Hold-to-Drag Interaction** - Users must hold down on page cards to initiate reordering (prevents accidental drags)
 - **Dynamic Rendering** - Maps over pages array from store
 - **Event Handling** - Page clicks, additions, and reordering
 - **State Synchronization** - Connects UI actions to store updates
+- **Tooltip Guidance** - "Hold to reorder" tooltips provide clear user instructions
 
 ### PageCard
 Individual page representation with:
@@ -139,6 +143,7 @@ Individual page representation with:
 - **Dropdown Menu** - Page management actions
 - **Inline Editing** - Contenteditable title editing
 - **Drag Compatibility** - Smart interaction with Swapy
+- **Interactive Tooltips** - "Hold to reorder" guidance for draggable cards
 
 ### PageForm
 Dynamic form component using TanStack Form:
@@ -199,7 +204,7 @@ pnpm type-check   # TypeScript validation
 2. Fill out form fields on each page
 3. Navigate between pages - data persists automatically
 4. Add new pages using the "+" button or separators
-5. Reorder pages by dragging and dropping
+5. **Hold and drag** page cards to reorder them (tooltip will guide you)
 6. Use dropdown menu for advanced page management
 
 ### Customization

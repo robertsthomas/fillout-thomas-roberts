@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
 export const PageCard = ({
@@ -135,7 +136,7 @@ export const PageCard = ({
     }
   };
 
-  return (
+  const cardContent = (
     <Card
       className={cn(
         "group p-1 text-sm w-max rounded-md transition-all duration-200",
@@ -228,4 +229,18 @@ export const PageCard = ({
       </CardContent>
     </Card>
   );
+
+  // Show tooltip for draggable cards (not add page buttons and not in editing mode)
+  if (!addPage && !isEditing) {
+    return (
+      <Tooltip delayDuration={700}>
+        <TooltipTrigger asChild>{cardContent}</TooltipTrigger>
+        <TooltipContent>
+          <p>Hold to reorder</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return cardContent;
 };
