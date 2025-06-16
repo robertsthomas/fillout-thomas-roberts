@@ -54,7 +54,6 @@ export const PageCard = ({
   onSwapyEnable?: (enabled: boolean) => void;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(title);
   const editableRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -92,7 +91,6 @@ export const PageCard = ({
         break;
       case "rename":
         setIsEditing(true);
-        setEditValue(title);
         break;
       case "copy":
         onCopy?.(pageId);

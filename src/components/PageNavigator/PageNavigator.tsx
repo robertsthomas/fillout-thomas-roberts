@@ -8,22 +8,16 @@ import {
   appStore,
   copyPage,
   duplicatePage,
-  initializePages,
   insertPageAt,
   removePage,
   renamePage,
   reorderPages,
   setAsFirstPage,
-  setCurrentPage,
 } from "~/lib/store";
 import { cn } from "~/lib/utils";
 import { PageCard } from "./PageCard";
 
-interface PageNavigatorProps {
-  initialPages?: Array<{ title: string; id?: string }>;
-}
-
-export const PageNavigator = ({ initialPages }: PageNavigatorProps) => {
+export const PageNavigator = () => {
   const router = useRouter();
   const pages = useStore(appStore, (state) => state.pages);
   const currentPageId = useStore(appStore, (state) => state.currentPageId);

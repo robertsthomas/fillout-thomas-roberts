@@ -2,13 +2,13 @@
 
 import { useStore } from "@tanstack/react-store";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { PageForm } from "~/components/PageForm";
 import { PageNavigator } from "~/components/PageNavigator/PageNavigator";
 import { type PageFormData, appStore, initializePages, setCurrentPage } from "~/lib/store";
 
 // Define the content for each page type
-const getPageContent = (pageId: string, title: string) => {
+const getPageContent = (_pageId: string, title: string) => {
   const baseContent = {
     Info: {
       title: "Information Page",
@@ -47,7 +47,7 @@ const getPageContent = (pageId: string, title: string) => {
   };
 };
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pages = useStore(appStore, (state) => state.pages);
@@ -103,8 +103,7 @@ export default function Home() {
     if (urlPageId !== currentPageId) {
       setCurrentPage(urlPageId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pages, urlPageId, router]); // Removed currentPageId from dependencies to prevent loop
+  }, [pages, urlPageId, router, currentPageId]);
 
   // Don't render anything until we have pages and page content
   if (!pages.length || !currentPage || !pageContent) {
@@ -207,5 +206,13 @@ export default function Home() {
         </div> */}
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
