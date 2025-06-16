@@ -1,5 +1,6 @@
 import { useStore } from "@tanstack/react-store";
 import { CirclePlusIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useState, useEffect, useRef } from "react";
 import { createSwapy } from "swapy";
 import {
@@ -23,25 +24,12 @@ interface PageNavigatorProps {
 }
 
 export const PageNavigator = ({ initialPages }: PageNavigatorProps) => {
+  const router = useRouter();
   const pages = useStore(appStore, (state) => state.pages);
   const currentPageId = useStore(appStore, (state) => state.currentPageId);
   const [hoveredSeparatorIndex, setHoveredSeparatorIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const swapyRef = useRef<ReturnType<typeof createSwapy> | null>(null);
-
-  // Initialize pages when component mounts or initialPages changes
-  useEffect(() => {
-    if (initialPages && initialPages.length > 0) {
-      initializePages(initialPages);
-    } else if (pages.length === 0) {
-      // Provide default pages if none exist and no initialPages provided
-      initializePages([
-        { id: "1", title: "Page 1" },
-        { id: "2", title: "Page 2" },
-        { id: "3", title: "Page 3" },
-      ]);
-    }
-  }, [initialPages, pages.length]);
 
   // Initialize Swapy when pages change
   useEffect(() => {
@@ -58,6 +46,9 @@ export const PageNavigator = ({ initialPages }: PageNavigatorProps) => {
           swapyRef.current = createSwapy(containerRef.current, {
             animation: "dynamic",
             swapMode: "drop",
+            dragOnHold: true,
+            dragAxis: "x", // horizontal
+            manualSwap: false,
           });
 
           // Listen for swap events
@@ -98,7 +89,7 @@ export const PageNavigator = ({ initialPages }: PageNavigatorProps) => {
   };
 
   const handlePageClick = (pageId: string) => {
-    setCurrentPage(pageId);
+    router.push(`?page=${pageId}`);
   };
 
   const handleSetAsFirst = (pageId: string) => {
@@ -128,15 +119,17 @@ export const PageNavigator = ({ initialPages }: PageNavigatorProps) => {
     }
   };
 
+  const handleSwapyEnable = (enabled: boolean) => {
+    if (swapyRef.current) {
+      swapyRef.current.enable(enabled);
+    }
+  };
+
   return (
     <div className="flex gap-1 items-center">
-      <div
-        ref={containerRef}
-        className="flex gap-1 items-center"
-        key={pages.map((p) => p.id).join("-")}
-      >
+      <div ref={containerRef} className="flex gap-1 items-center">
         {pages.map((page, index) => (
-          <React.Fragment key={page.id}>
+          <React.Fragment key={`${page.id}-${index}`}>
             <div data-swapy-slot={`slot-${index}`} className="flex">
               <div data-swapy-item={page.id}>
                 <PageCard
@@ -151,6 +144,7 @@ export const PageNavigator = ({ initialPages }: PageNavigatorProps) => {
                   onCopy={handleCopy}
                   onDuplicate={handleDuplicate}
                   onDelete={handleDelete}
+                  onSwapyEnable={handleSwapyEnable}
                   className={cn(
                     "transition-transform duration-300 ease-out",
                     hoveredSeparatorIndex === index - 1 && "translate-x-[4px]",

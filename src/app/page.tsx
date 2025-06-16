@@ -1,83 +1,211 @@
-import Image from "next/image";
+"use client";
+
+import { useStore } from "@tanstack/react-store";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
+import { PageForm } from "~/components/PageForm";
+import { PageNavigator } from "~/components/PageNavigator/PageNavigator";
+import { type PageFormData, appStore, initializePages, setCurrentPage } from "~/lib/store";
+
+// Define the content for each page type
+const getPageContent = (pageId: string, title: string) => {
+  const baseContent = {
+    Info: {
+      title: "Information Page",
+      description: "Collect basic user information",
+      fields: ["Name", "Email", "Phone Number", "Date of Birth"],
+    },
+    Details: {
+      title: "Details Page",
+      description: "Gather detailed information",
+      fields: ["Address", "Company", "Job Title", "Experience Level"],
+    },
+    Other: {
+      title: "Other Information",
+      description: "Additional optional information",
+      fields: ["Preferences", "Comments", "Special Requirements", "Referral Source"],
+    },
+    Ending: {
+      title: "Final Steps",
+      description: "Review and submit",
+      fields: ["Terms & Conditions", "Privacy Policy", "Submit Button"],
+    },
+  };
+
+  // Try to match the title to a base content type, otherwise create generic content
+  const matchedContent = baseContent[title as keyof typeof baseContent];
+
+  if (matchedContent) {
+    return matchedContent;
+  }
+
+  // Generic content for custom pages
+  return {
+    title: title,
+    description: `This is the ${title} page`,
+    fields: ["Field 1", "Field 2", "Field 3", "Field 4"],
+  };
+};
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">Save and see your changes instantly.</li>
-        </ol>
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pages = useStore(appStore, (state) => state.pages);
+  const currentPageId = useStore(appStore, (state) => state.currentPageId);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const urlPageId = searchParams.get("page");
+  const currentPage = pages.find((p) => p.id === urlPageId) || pages[0];
+
+  // Initialize default pages if none exist
+  useEffect(() => {
+    if (pages.length === 0) {
+      initializePages([
+        { title: "Info", id: "info" },
+        { title: "Details", id: "details" },
+        { title: "Other", id: "other" },
+        { title: "Ending", id: "ending" },
+      ]);
+    }
+  }, [pages.length]);
+
+  // Memoize page content to prevent recalculation on every render
+  const pageContent = useMemo(() => {
+    if (!currentPage) return null;
+    return getPageContent(currentPage.id, currentPage.title);
+  }, [currentPage]);
+
+  // Handle URL and store synchronization
+  useEffect(() => {
+    if (pages.length === 0) return;
+
+    // If no URL page, redirect to first page
+    if (!urlPageId) {
+      const firstPageId = pages[0].id;
+      router.replace(`?page=${firstPageId}`);
+      if (currentPageId !== firstPageId) {
+        setCurrentPage(firstPageId);
+      }
+      return;
+    }
+
+    // If URL page doesn't exist, redirect to first page
+    const pageExists = pages.find((p) => p.id === urlPageId);
+    if (!pageExists) {
+      const firstPageId = pages[0].id;
+      router.replace(`?page=${firstPageId}`);
+      if (currentPageId !== firstPageId) {
+        setCurrentPage(firstPageId);
+      }
+      return;
+    }
+
+    // Sync store with URL if they differ
+    if (urlPageId !== currentPageId) {
+      setCurrentPage(urlPageId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pages, urlPageId, router]); // Removed currentPageId from dependencies to prevent loop
+
+  // Don't render anything until we have pages and page content
+  if (!pages.length || !currentPage || !pageContent) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-6xl mx-auto px-8 py-4">
+            <h1 className="text-2xl font-bold mb-4">Form Builder</h1>
+            <PageNavigator />
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header with PageNavigator */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-8 py-4">
+          <h1 className="text-2xl font-bold mb-4">Form Builder</h1>
+          <PageNavigator />
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="max-w-6xl mx-auto px-8 py-8">
+        <div className="bg-white rounded-lg shadow-sm p-8">
+          {/* Page Header */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">{pageContent.title}</h2>
+            <p className="text-lg text-gray-600">{pageContent.description}</p>
+            <div className="mt-2 text-sm text-gray-500">
+              Page ID: <code className="bg-gray-100 px-2 py-1 rounded">{currentPage.id}</code>
+            </div>
+          </div>
+
+          {/* Page Form */}
+          <PageForm
+            pageId={currentPage.id}
+            fields={pageContent.fields}
+            onFormChange={(formData: PageFormData) => {
+              console.log("Form data updated for page:", currentPage.id, formData);
+            }}
+          />
+
+          {/* Navigation Buttons */}
+          <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => {
+                const currentIndex = pages.findIndex((p) => p.id === currentPage.id);
+                if (currentIndex > 0) {
+                  const prevPage = pages[currentIndex - 1];
+                  setCurrentPage(prevPage.id);
+                }
+              }}
+              disabled={pages.findIndex((p) => p.id === currentPage.id) === 0}
+              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                const currentIndex = pages.findIndex((p) => p.id === currentPage.id);
+                if (currentIndex < pages.length - 1) {
+                  const nextPage = pages[currentIndex + 1];
+                  setCurrentPage(nextPage.id);
+                }
+              }}
+              disabled={pages.findIndex((p) => p.id === currentPage.id) === pages.length - 1}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {pages.findIndex((p) => p.id === currentPage.id) === pages.length - 1
+                ? "Submit"
+                : "Next"}
+            </button>
+          </div>
+        </div>
+
+        {/* Debug Info */}
+        {/* <div className="mt-8 bg-gray-100 rounded-lg p-4">
+          <h3 className="text-lg font-semibold mb-2">Debug Info:</h3>
+          <div className="text-sm space-y-1">
+            <div>
+              <strong>Current Page:</strong> {currentPage.title} (ID: {currentPage.id})
+            </div>
+            <div>
+              <strong>URL Page Param:</strong> {urlPageId || "none"}
+            </div>
+            <div>
+              <strong>Total Pages:</strong> {pages.length}
+            </div>
+            <div>
+              <strong>All Pages:</strong> {pages.map((p) => `${p.title}(${p.id})`).join(", ")}
+            </div>
+          </div>
+        </div> */}
+      </div>
     </div>
   );
 }

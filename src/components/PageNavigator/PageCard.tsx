@@ -36,6 +36,7 @@ export const PageCard = ({
   onCopy,
   onDuplicate,
   onDelete,
+  onSwapyEnable,
 }: {
   title: string;
   isLast: boolean;
@@ -50,6 +51,7 @@ export const PageCard = ({
   onCopy?: (pageId: string) => void;
   onDuplicate?: (pageId: string) => void;
   onDelete?: (pageId: string) => void;
+  onSwapyEnable?: (enabled: boolean) => void;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
@@ -174,12 +176,14 @@ export const PageCard = ({
           {title}
         </span>
         {isActive && !addPage && !isEditing && (
-          <DropdownMenu>
+          <DropdownMenu
+            onOpenChange={(open) => {
+              // Disable Swapy when dropdown is open, enable when closed
+              onSwapyEnable?.(!open);
+            }}
+          >
             <DropdownMenuTrigger asChild>
-              <EllipsisVerticalIcon
-                className="w-4 h-4 animate-in slide-in-from-right-2 duration-200 hover:bg-gray-100 rounded p-0.5"
-                onClick={(e) => e.stopPropagation()}
-              />
+              <EllipsisVerticalIcon className="w-4 h-4 animate-in slide-in-from-right-2 duration-200 hover:bg-gray-100 rounded p-0.5 cursor-pointer" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48" align="end">
               <DropdownMenuLabel>Settings</DropdownMenuLabel>
@@ -188,7 +192,7 @@ export const PageCard = ({
                 className="cursor-pointer"
                 onClick={(e) => handleDropdownAction("setAsFirst", e)}
               >
-                <FlagIcon className="mr-2 h-4 w-4" fill="#2F72E2" />
+                <FlagIcon className="mr-2 h-4 w-4 text-[#2F72E2]" fill="#2F72E2" />
                 Set as first page
               </DropdownMenuItem>
               <DropdownMenuItem
