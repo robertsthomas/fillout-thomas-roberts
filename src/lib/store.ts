@@ -134,3 +134,19 @@ export const initializePages = (pages: Array<{ title: string; id?: string }>) =>
     currentPageId: newPages.length > 0 ? newPages[0].id : null,
   }));
 };
+
+export const reorderPages = (newOrder: Array<{ slot: string; item: string }>) => {
+  appStore.setState((state) => {
+    const reorderedPages = newOrder
+      .map((orderItem) => {
+        const pageId = orderItem.item;
+        return state.pages.find((page) => page.id === pageId);
+      })
+      .filter(Boolean) as Array<{ title: string; id: string }>;
+
+    return {
+      ...state,
+      pages: reorderedPages,
+    };
+  });
+};

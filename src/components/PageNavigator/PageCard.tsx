@@ -80,7 +80,7 @@ export const PageCard = ({
     return <FileTextIcon className="w-5 h-5" />;
   };
 
-  const handleDropdownAction = (action: string, e: Event) => {
+  const handleDropdownAction = (action: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!pageId) return;
 
@@ -138,7 +138,11 @@ export const PageCard = ({
   return (
     <Card
       className={cn(
-        "p-1 text-sm w-max rounded-md cursor-pointer transition-all duration-200",
+        "group p-1 text-sm w-max rounded-md transition-all duration-200",
+        // Cursor states - grab when draggable, pointer when not
+        !addPage && !isEditing && "cursor-grab active:cursor-grabbing",
+        addPage && "cursor-pointer",
+        isEditing && "cursor-text",
         // Active state - white background
         isActive && "bg-white opacity-100",
         // Non-active state - gray background with hover

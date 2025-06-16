@@ -20,6 +20,47 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## PageNavigator Component
+
+This project includes a comprehensive PageNavigator component with the following features:
+
+### Features
+- **Drag & Drop Reordering**: Pages can be reordered by dragging and dropping using [Swapy](https://swapy.tahazsh.com/)
+- **Interactive Page Management**: Add, rename, copy, duplicate, and delete pages
+- **Visual States**: Active/inactive page states with hover effects
+- **Inline Editing**: Click to rename pages with contenteditable functionality
+- **Dropdown Actions**: Right-click menu with page management options
+- **Smooth Animations**: Hover effects and transitions for better UX
+
+### Usage
+```tsx
+import { PageNavigator } from "~/components/PageNavigator/PageNavigator";
+
+// Basic usage
+<PageNavigator />
+
+// With initial pages
+<PageNavigator 
+  initialPages={[
+    { title: "Welcome Page", id: "welcome" },
+    { title: "Contact Form", id: "contact" },
+    { title: "Thank You", id: "thanks" },
+  ]}
+/>
+```
+
+### Drag & Drop
+- Hover over any page card to reveal the drag handle (grip icon)
+- Click and drag the handle to reorder pages
+- Pages will smoothly animate to their new positions
+- The highlighted drop zone shows where the page will be placed
+
+### Testing
+Run the component stories with Ladle:
+```bash
+pnpm ladle serve
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
