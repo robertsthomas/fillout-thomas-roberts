@@ -4,6 +4,9 @@ A modern, interactive form builder application built with Next.js, featuring dyn
 
 This project demonstrates how AI tools like Cursor can accelerate development while maintaining deep understanding of the codebase. While the core design decisions and architecture were carefully planned, AI assistance was leveraged to streamline the implementation of Next.js page logic. This approach showcases how we can build applications fast by with AI while still understanding the context of whats being built.
 
+## Live Site
+
+https://fillout-thomas-roberts.vercel.app/?page=info
 
 ## 🚀 Getting Started
 
